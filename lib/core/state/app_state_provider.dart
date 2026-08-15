@@ -30,6 +30,30 @@ class AppStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  AppStateProvider() {
+    _initSession();
+  }
+
+  void _initSession() {
+    try {
+      final authUser = SupabaseService.currentAuthUser;
+      if (authUser != null) {
+        _isLoggedIn = true;
+        _hasCompletedOnboarding = true;
+        final meta = authUser.userMetadata ?? {};
+        _user = UserProfile(
+          id: authUser.id,
+          fullName: meta['full_name'] ?? (authUser.email != null ? authUser.email!.split('@')[0] : 'Haware Foodie'),
+          email: authUser.email ?? 'user@example.com',
+          phone: meta['phone'] ?? '',
+          avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400',
+          walletBalance: 25.00,
+          loyaltyPoints: 100,
+        );
+      }
+    } catch (_) {}
+  }
+
   // Multi-Resto & Multi-Driver Active Session State
   Restaurant? _activeMerchantRestaurant;
   DeliveryDriver? _activeDriverSession;
@@ -174,27 +198,6 @@ class AppStateProvider extends ChangeNotifier {
     ),
   ];
 
-  AppStateProvider() {
-    _initAuthSession();
-  }
-
-  void _initAuthSession() {
-    final authUser = SupabaseService.currentAuthUser;
-    if (authUser != null) {
-      _isLoggedIn = true;
-      final meta = authUser.userMetadata ?? {};
-      _user = UserProfile(
-        id: authUser.id,
-        fullName: meta['full_name'] ?? authUser.email?.split('@')[0] ?? 'Haware User',
-        email: authUser.email ?? 'user@example.com',
-        phone: meta['phone'] ?? '',
-        avatarUrl: meta['avatar_url'] ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400',
-        walletBalance: 25.00,
-        loyaltyPoints: 100,
-      );
-    }
-  }
-
   // Getters
   UserProfile get user => _user;
   bool get isLoggedIn => _isLoggedIn;
@@ -260,6 +263,7 @@ class AppStateProvider extends ChangeNotifier {
   // Authentication Handlers
   void setUserFromAuth({required String id, required String email, required String fullName, required String phone}) {
     _isLoggedIn = true;
+    _hasCompletedOnboarding = true;
     _user = UserProfile(
       id: id,
       fullName: fullName.isNotEmpty ? fullName : email.split('@')[0],

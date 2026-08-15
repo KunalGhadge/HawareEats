@@ -13,7 +13,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
   final List<Map<String, dynamic>> _messages = [
     {
       'isBot': true,
-      'text': 'Hello Kunal! Welcome to HawareEats 24/7 Priority Support. How can we help you today?',
+      'text': 'Hello! Welcome to HawareEats 24/7 Priority Support. How can we help you today?',
       'time': 'Just now',
     },
   ];

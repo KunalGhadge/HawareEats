@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/app_colors.dart';
+import '../../../core/state/app_state_provider.dart';
 import '../models/onboarding_item.dart';
 import '../../auth/screens/login_screen.dart';
 
@@ -21,12 +23,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       imagePath: 'assets/images/onboarding_1.jpg',
     ),
     OnboardingItem(
-      title: 'Fast Delivery',
-      description: 'Lightning fast deliveries in 10 to 20 minutes right to your door.',
+      title: 'Lightning Delivery',
+      description: 'Gourmet hot meals delivered in 15-25 minutes straight to your doorstep.',
       imagePath: 'assets/images/onboarding_2.jpg',
     ),
     OnboardingItem(
-      title: 'Real-Time Tracking',
+      title: 'Live GPS Tracking',
       description: 'Watch your delivery hero ride on the live interactive GPS map.',
       imagePath: 'assets/images/onboarding_3.jpg',
     ),
@@ -53,6 +55,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _finishOnboarding() {
+    context.read<AppStateProvider>().completeOnboarding();
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (ctx) => const LoginScreen()),
     );

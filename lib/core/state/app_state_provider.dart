@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import '../models/models.dart';
 import '../mock/mock_data.dart';
 import '../services/supabase_service.dart';
@@ -17,9 +18,17 @@ class AppStateProvider extends ChangeNotifier {
   );
 
   bool _isLoggedIn = false;
+  bool _hasCompletedOnboarding = false;
   UserRole _currentRole = UserRole.customer;
   String _securityPin = '1234';
-  String _adminPasscode = 'ADMIN9999';
+  final String _adminPasscode = 'ADMIN9999';
+  Timer? _orderSimulationTimer;
+
+  bool get hasCompletedOnboarding => _hasCompletedOnboarding || _isLoggedIn;
+  void completeOnboarding() {
+    _hasCompletedOnboarding = true;
+    notifyListeners();
+  }
 
   // Multi-Resto & Multi-Driver Active Session State
   Restaurant? _activeMerchantRestaurant;
@@ -434,10 +443,81 @@ class AppStateProvider extends ChangeNotifier {
     _cartItems.clear();
     _appliedVoucher = null;
     notifyListeners();
+
+    // Start auto-progressing order lifecycle milestones
+    startOrderSimulation(newOrder.id);
+
     return newOrder;
   }
 
+  void updateOrderStatus(String orderId, OrderStatus status) {
+    final idx = _orders.indexWhere((o) => o.id == orderId);
+    if (idx >= 0) {
+      _orders[idx] = _orders[idx].copyWith(status: status);
+      
+      // Add dynamic live notifications
+      String title = 'Order Update';
+      String body = 'Your order is being processed.';
+      if (status == OrderStatus.confirmed) {
+        title = 'Order Confirmed! ✅';
+        body = 'The kitchen has accepted your order and started cooking.';
+      } else if (status == OrderStatus.preparing) {
+        title = 'Kitchen is Cooking 👨‍🍳';
+        body = 'Your gourmet meal is on the grill with fresh ingredients!';
+      } else if (status == OrderStatus.readyForPickup) {
+        title = 'Ready for Pickup 📦';
+        body = 'Order packed and assigned to Delivery Hero.';
+      } else if (status == OrderStatus.onTheWay) {
+        title = 'Driver is On The Way! 🛵';
+        body = 'Your Delivery Hero is riding to your address.';
+      } else if (status == OrderStatus.delivered) {
+        title = 'Order Delivered! 🎉';
+        body = 'Enjoy your delicious meal! Please leave a review.';
+      }
+
+      _notifications.insert(
+        0,
+        NotificationItem(
+          id: 'notif_${DateTime.now().millisecondsSinceEpoch}',
+          title: title,
+          body: body,
+          type: 'order',
+          timestamp: DateTime.now(),
+        ),
+      );
+
+      // Trigger vibrational feedback
+      try {
+        HapticFeedback.mediumImpact();
+      } catch (_) {}
+
+      notifyListeners();
+    }
+  }
+
+  void startOrderSimulation(String orderId) {
+    _orderSimulationTimer?.cancel();
+    int step = 0;
+    final statusMilestones = [
+      OrderStatus.confirmed,
+      OrderStatus.preparing,
+      OrderStatus.readyForPickup,
+      OrderStatus.onTheWay,
+      OrderStatus.delivered,
+    ];
+
+    _orderSimulationTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (step >= statusMilestones.length) {
+        timer.cancel();
+        return;
+      }
+      updateOrderStatus(orderId, statusMilestones[step]);
+      step++;
+    });
+  }
+
   void cancelOrder(String orderId, String reason) {
+    _orderSimulationTimer?.cancel();
     final idx = _orders.indexWhere((o) => o.id == orderId);
     if (idx >= 0) {
       _orders[idx] = _orders[idx].copyWith(status: OrderStatus.cancelled);

@@ -7,7 +7,7 @@ class InviteFriendsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const referralCode = 'HAWARE-KUNAL';
+    const referralCode = 'HAWARE-EATS2026';
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,

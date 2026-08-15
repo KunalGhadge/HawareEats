@@ -200,8 +200,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
-                  hintText: '+91 98200 XXXXX',
-                  prefixIcon: const Icon(Icons.phone_outlined, color: AppColors.textMuted, size: 20),
+                  hintText: '98200 XXXXX',
+                  prefixIcon: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('🇮🇳 +91', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textDark)),
+                        SizedBox(width: 8),
+                        Text('|', style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                  ),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),

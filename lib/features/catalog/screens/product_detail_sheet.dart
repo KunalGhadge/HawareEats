@@ -97,6 +97,7 @@ class _ProductDetailSheetState extends State<ProductDetailSheet> {
           // Scrollable Body
           Expanded(
             child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

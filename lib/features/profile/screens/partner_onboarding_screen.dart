@@ -13,8 +13,8 @@ class PartnerOnboardingScreen extends StatefulWidget {
 
 class _PartnerOnboardingScreenState extends State<PartnerOnboardingScreen> {
   final TextEditingController _businessNameController = TextEditingController();
-  final TextEditingController _ownerNameController = TextEditingController(text: 'Kunal Haware');
-  final TextEditingController _phoneController = TextEditingController(text: '+91 98200 12345');
+  final TextEditingController _ownerNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _vehicleController = TextEditingController(text: 'Honda Super Cub / Motorcycle');
   final TextEditingController _licenseController = TextEditingController(text: 'MH-43-2026-009821');

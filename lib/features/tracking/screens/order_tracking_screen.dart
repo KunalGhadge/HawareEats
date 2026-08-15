@@ -252,11 +252,12 @@ class OrderTrackingScreen extends StatelessWidget {
   }
 
   Widget _buildStepper(OrderStatus status) {
-    int activeIndex = 0;
-    if (status == OrderStatus.confirmed) activeIndex = 1;
-    if (status == OrderStatus.preparing) activeIndex = 2;
-    if (status == OrderStatus.onTheWay || status == OrderStatus.readyForPickup) activeIndex = 3;
-    if (status == OrderStatus.delivered) activeIndex = 4;
+    int activeIndex = 1;
+    if (status == OrderStatus.placed) activeIndex = 1;
+    if (status == OrderStatus.confirmed) activeIndex = 2;
+    if (status == OrderStatus.preparing || status == OrderStatus.readyForPickup) activeIndex = 3;
+    if (status == OrderStatus.onTheWay) activeIndex = 4;
+    if (status == OrderStatus.delivered) activeIndex = 5;
 
     final steps = ['Order Placed', 'Confirmed', 'Kitchen Prep', 'On The Way'];
 

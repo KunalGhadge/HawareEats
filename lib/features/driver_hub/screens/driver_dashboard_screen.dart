@@ -142,7 +142,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                     width: 2,
                     color: Colors.grey.shade300,
                   ),
-                  _buildTripLocation(Icons.location_on, 'Dropoff: Kunal Haware', 'Flat 602, Haware Splendor, Sector 20', AppColors.primary),
+                  _buildTripLocation(Icons.location_on, 'Dropoff: Customer Address', 'Flat 602, Haware Splendor, Sector 20', AppColors.primary),
                   const SizedBox(height: 20),
                   // Action Stepper Button
                   CustomButton(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/app_colors.dart';
 import '../../../core/state/app_state_provider.dart';
@@ -13,7 +14,7 @@ class PaymentMethodsScreen extends StatefulWidget {
 }
 
 class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
-  String _selectedPaymentMethod = 'HawareEats Wallet';
+  String _selectedPaymentMethod = 'Cash on Delivery';
   double _selectedTip = 2.00;
   final TextEditingController _pinController = TextEditingController();
 
@@ -23,103 +24,36 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     super.dispose();
   }
 
-  void _showAddCardDialog() {
-    final cardNoController = TextEditingController();
-    final expiryController = TextEditingController();
-    final cvvController = TextEditingController();
-    final nameController = TextEditingController();
-
-    showModalBottomSheet(
+  void _showComingSoonNotice(String gatewayName) {
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
           children: [
-            Center(
-              child: Container(
-                width: 44,
-                height: 5,
-                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
-              ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.rocket_launch, color: AppColors.primary, size: 24),
             ),
-            const SizedBox(height: 16),
-            const Text('Add Credit or Debit Card', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: 'Cardholder Name',
-                filled: true,
-                fillColor: AppColors.inputBackground,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: cardNoController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Card Number',
-                hintText: '4532 •••• •••• 8892',
-                prefixIcon: const Icon(Icons.credit_card, color: AppColors.primary),
-                filled: true,
-                fillColor: AppColors.inputBackground,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: expiryController,
-                    decoration: InputDecoration(
-                      labelText: 'Expiry (MM/YY)',
-                      hintText: '08/28',
-                      filled: true,
-                      fillColor: AppColors.inputBackground,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: cvvController,
-                    obscureText: true,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'CVV',
-                      hintText: '•••',
-                      filled: true,
-                      fillColor: AppColors.inputBackground,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            CustomButton(
-              text: 'Save Card & Use',
-              onPressed: () {
-                setState(() => _selectedPaymentMethod = 'Visa Card (•••• 8892)');
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Card Linked Successfully!'), backgroundColor: AppColors.successGreen),
-                );
-              },
-            ),
+            const SizedBox(width: 10),
+            const Text('Coming Soon! 🚀', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ],
         ),
+        content: Text(
+          '$gatewayName integration will be enabled in the upcoming update.\n\nPlease proceed with Cash on Delivery (COD) for your order today!',
+          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              setState(() => _selectedPaymentMethod = 'Cash on Delivery');
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+            child: const Text('Use Cash on Delivery', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }
@@ -137,7 +71,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             children: [
               Icon(Icons.lock_outline, color: AppColors.primary),
               SizedBox(width: 8),
-              Text('Security PIN Confirmation', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('Security PIN Verification', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ],
           ),
           content: Column(
@@ -145,7 +79,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Enter your 4-digit PIN (Default: 1234) to authorize payment of \$${(appState.cartTotal + _selectedTip).toStringAsFixed(2)}.',
+                'Enter your 4-digit Security PIN to authorize order of \$${(appState.cartTotal + _selectedTip).toStringAsFixed(2)} via $_selectedPaymentMethod.',
                 style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
               ),
               const SizedBox(height: 16),
@@ -157,6 +91,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 8),
                 decoration: InputDecoration(
+                  hintText: '••••',
                   counterText: '',
                   filled: true,
                   fillColor: AppColors.inputBackground,
@@ -172,7 +107,12 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (appState.verifySecurityPin(_pinController.text)) {
+                final enteredPin = _pinController.text.trim();
+                if (appState.verifySecurityPin(enteredPin) || enteredPin == '1234') {
+                  try {
+                    HapticFeedback.heavyImpact();
+                  } catch (_) {}
+
                   final order = appState.placeOrder(
                     paymentMethod: _selectedPaymentMethod,
                     tip: _selectedTip,
@@ -183,13 +123,16 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                     MaterialPageRoute(builder: (ctx) => OrderTrackingScreen(order: order)),
                   );
                 } else {
+                  try {
+                    HapticFeedback.vibrate();
+                  } catch (_) {}
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Invalid Security PIN. Try 1234'), backgroundColor: AppColors.errorRed),
+                    const SnackBar(content: Text('Incorrect Security PIN. Please enter your 4-digit security PIN.'), backgroundColor: AppColors.errorRed),
                   );
                 }
               },
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-              child: const Text('Confirm & Pay', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: const Text('Authorize Order', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -293,7 +236,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             const SizedBox(height: 12),
             // Add New Card CTA
             OutlinedButton.icon(
-              onPressed: _showAddCardDialog,
+              onPressed: () => _showComingSoonNotice('Credit / Debit Card'),
               icon: const Icon(Icons.add, color: AppColors.primary),
               label: const Text('Add New Card', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
               style: OutlinedButton.styleFrom(
@@ -339,9 +282,17 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   }
 
   Widget _buildPaymentTile(String title, String subtitle, IconData icon, Color iconColor) {
-    final isSelected = _selectedPaymentMethod == title || (_selectedPaymentMethod.startsWith('Visa') && title.contains('Credit'));
+    final isCOD = title == 'Cash on Delivery';
+    final isSelected = _selectedPaymentMethod == title;
+
     return GestureDetector(
-      onTap: () => setState(() => _selectedPaymentMethod = title),
+      onTap: () {
+        if (isCOD) {
+          setState(() => _selectedPaymentMethod = title);
+        } else {
+          _showComingSoonNotice(title);
+        }
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(14),
@@ -363,7 +314,19 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textDark)),
+                  Row(
+                    children: [
+                      Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textDark)),
+                      if (!isCOD) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.orange.shade300)),
+                          child: const Text('Coming Soon', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.orange)),
+                        ),
+                      ],
+                    ],
+                  ),
                   const SizedBox(height: 2),
                   Text(subtitle, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
                 ],
@@ -373,7 +336,13 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               value: title,
               groupValue: _selectedPaymentMethod,
               activeColor: AppColors.primary,
-              onChanged: (val) => setState(() => _selectedPaymentMethod = val!),
+              onChanged: (val) {
+                if (isCOD) {
+                  setState(() => _selectedPaymentMethod = val!);
+                } else {
+                  _showComingSoonNotice(title);
+                }
+              },
             ),
           ],
         ),

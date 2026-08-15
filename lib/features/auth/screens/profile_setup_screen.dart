@@ -45,10 +45,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     final user = appState.user;
 
     _nameController = TextEditingController(text: widget.fullName ?? user.fullName);
-    _nicknameController = TextEditingController(text: user.nickname.isNotEmpty ? user.nickname : 'Kunal');
+    _nicknameController = TextEditingController(text: user.nickname.isNotEmpty ? user.nickname : '');
     _emailController = TextEditingController(text: widget.phoneOrEmail?.contains('@') == true ? widget.phoneOrEmail : user.email);
     _phoneController = TextEditingController(text: widget.phoneOrEmail?.contains('@') == false ? widget.phoneOrEmail : user.phone);
-    _dobController = TextEditingController(text: user.dateOfBirth);
+    _dobController = TextEditingController(text: user.dateOfBirth.isNotEmpty ? user.dateOfBirth : '2000-01-01');
     _selectedGender = user.gender;
     _avatarUrl = user.avatarUrl;
   }
@@ -63,6 +63,36 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     super.dispose();
   }
 
+  Future<void> _pickDateOfBirth() async {
+    DateTime initial = DateTime(2000, 1, 1);
+    try {
+      if (_dobController.text.isNotEmpty) {
+        initial = DateTime.parse(_dobController.text);
+      }
+    } catch (_) {}
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(1940),
+      lastDate: DateTime.now().subtract(const Duration(days: 365 * 10)),
+      builder: (ctx, child) {
+        return Theme(
+          data: Theme.of(ctx).copyWith(
+            colorScheme: const ColorScheme.light(primary: AppColors.primary, onPrimary: Colors.white, surface: Colors.white),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _dobController.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      });
+    }
+  }
+
   void _saveProfile() {
     final appState = context.read<AppStateProvider>();
     final updated = appState.user.copyWith(
@@ -75,8 +105,11 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       avatarUrl: _avatarUrl,
     );
 
+    appState.updateUserProfile(updated);
+
     // Save
     if (widget.isInitialSetup) {
+      appState.completeOnboarding();
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (ctx) => const MainShell()),
@@ -191,7 +224,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             _buildFieldLabel('Nickname'),
             TextField(
               controller: _nicknameController,
-              decoration: _inputDecoration('e.g. Kunal', Icons.badge_outlined),
+              decoration: _inputDecoration('e.g. Alex / Foodie', Icons.badge_outlined),
             ),
             const SizedBox(height: 16),
             // Email
@@ -218,9 +251,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildFieldLabel('Date of Birth'),
-                      TextField(
-                        controller: _dobController,
-                        decoration: _inputDecoration('YYYY-MM-DD', Icons.calendar_today_outlined),
+                      GestureDetector(
+                        onTap: _pickDateOfBirth,
+                        child: AbsorbPointer(
+                          child: TextField(
+                            controller: _dobController,
+                            decoration: _inputDecoration('Select Date of Birth', Icons.calendar_today_outlined),
+                          ),
+                        ),
                       ),
                     ],
                   ),

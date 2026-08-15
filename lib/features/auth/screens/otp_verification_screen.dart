@@ -106,12 +106,12 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
               ),
               const SizedBox(height: 24),
               const Text(
-                'OTP Code Verification 🔒',
+                'Instant Account Activation 🔒',
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textDark),
               ),
               const SizedBox(height: 10),
               Text(
-                'We have sent a 4-digit verification code to\n${widget.phoneOrEmail}',
+                'Enter the 4-digit security code below to activate your account for ${widget.phoneOrEmail}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.4),
               ),

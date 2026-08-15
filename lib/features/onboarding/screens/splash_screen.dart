@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/app_colors.dart';
+import '../../../core/state/app_state_provider.dart';
+import '../../main_shell.dart';
 import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -28,11 +31,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _progressController.forward();
 
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 2, milliseconds: 500), () {
       if (mounted) {
+        final appState = context.read<AppStateProvider>();
+        final destination = appState.hasCompletedOnboarding ? const MainShell() : const OnboardingScreen();
+
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const OnboardingScreen(),
+            pageBuilder: (_, __, ___) => destination,
             transitionsBuilder: (_, animation, __, child) {
               return FadeTransition(opacity: animation, child: child);
             },

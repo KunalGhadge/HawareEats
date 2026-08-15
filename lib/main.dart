@@ -8,8 +8,12 @@ import 'features/onboarding/screens/splash_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase Backend
-  await SupabaseService.initialize();
+  // Safely Initialize Supabase Backend without crashing on boot
+  try {
+    await SupabaseService.initialize();
+  } catch (e) {
+    debugPrint('Supabase initial connection note: $e');
+  }
 
   runApp(
     MultiProvider(
@@ -36,7 +40,6 @@ class HawareEatsApp extends StatelessWidget {
           seedColor: AppColors.primary,
           primary: AppColors.primary,
           surface: Colors.white,
-          background: AppColors.backgroundLight,
         ),
         scaffoldBackgroundColor: AppColors.backgroundLight,
         appBarTheme: const AppBarTheme(

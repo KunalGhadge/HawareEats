@@ -33,6 +33,7 @@ class HawareEatsApp extends StatelessWidget {
     return MaterialApp(
       title: 'HawareEats',
       debugShowCheckedModeBanner: false,
+      scrollBehavior: const MaterialScrollBehavior().copyWith(overscroll: false),
       theme: ThemeData(
         useMaterial3: true,
         fontFamily: 'Roboto',
@@ -40,8 +41,14 @@ class HawareEatsApp extends StatelessWidget {
           seedColor: AppColors.primary,
           primary: AppColors.primary,
           surface: Colors.white,
+          surfaceTint: Colors.transparent,
         ),
         scaffoldBackgroundColor: AppColors.backgroundLight,
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+        ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.transparent,

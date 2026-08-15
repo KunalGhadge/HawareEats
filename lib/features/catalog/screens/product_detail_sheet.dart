@@ -71,73 +71,78 @@ class _ProductDetailSheetState extends State<ProductDetailSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<AppStateProvider>();
-    final isFavorite = appState.likedFoodIds.contains(widget.item.id);
-
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.9,
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.white,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      child: Column(
-        children: [
-          // Drag handle
-          Container(
-            margin: const EdgeInsets.only(top: 12, bottom: 8),
-            width: 44,
-            height: 5,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(10),
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
+        color: Colors.white,
+        child: Column(
+          children: [
+            // Drag handle
+            Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 44,
+              height: 5,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-          ),
-          // Scrollable Body
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Hero Image Carousel
-                  Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: AspectRatio(
-                          aspectRatio: 1.5,
-                          child: Image.network(
-                            widget.item.imageUrl,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: GestureDetector(
-                          onTap: () => appState.toggleFavoriteFood(widget.item.id),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.95),
-                              shape: BoxShape.circle,
-                              boxShadow: const [AppColors.softShadow],
-                            ),
-                            child: Icon(
-                              isFavorite ? Icons.favorite : Icons.favorite_border,
-                              color: isFavorite ? AppColors.primary : AppColors.textMuted,
-                              size: 20,
+            // Scrollable Body
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Hero Image Carousel
+                    Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: AspectRatio(
+                            aspectRatio: 1.5,
+                            child: Image.network(
+                              widget.item.imageUrl,
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: Consumer<AppStateProvider>(
+                            builder: (ctx, appState, _) {
+                              final isFavorite = appState.likedFoodIds.contains(widget.item.id);
+                              return GestureDetector(
+                                onTap: () => appState.toggleFavoriteFood(widget.item.id),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.95),
+                                    shape: BoxShape.circle,
+                                    boxShadow: const [AppColors.softShadow],
+                                  ),
+                                  child: Icon(
+                                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                                    color: isFavorite ? AppColors.primary : AppColors.textMuted,
+                                    size: 20,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
                   // Title & Price
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -319,7 +324,7 @@ class _ProductDetailSheetState extends State<ProductDetailSheet> {
                   child: CustomButton(
                     text: 'Add to Basket • \$${_totalPrice.toStringAsFixed(2)}',
                     onPressed: () {
-                      appState.addToCart(
+                      context.read<AppStateProvider>().addToCart(
                         widget.item,
                         quantity: _quantity,
                         customizers: _formattedCustomizers,
@@ -348,6 +353,7 @@ class _ProductDetailSheetState extends State<ProductDetailSheet> {
           ),
         ],
       ),
+    ),
     );
   }
 
